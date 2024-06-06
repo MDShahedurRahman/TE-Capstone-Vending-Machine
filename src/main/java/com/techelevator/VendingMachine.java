@@ -3,6 +3,8 @@ package com.techelevator;
 import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.sql.SQLOutput;
 import java.util.Map;
 import java.util.Scanner;
 import java.util.TreeMap;
@@ -55,18 +57,96 @@ public class VendingMachine {
     }
 
     public void feedMoney() {
+        Scanner userInput = new Scanner(System.in);
+        System.out.print("How much money are you depositing? ");
+        try {
+            BigDecimal amount = new BigDecimal(userInput.nextLine());
+            if (amount.compareTo(BigDecimal.ZERO) > 0) {
+                // Adds user input to balance
+                balance = balance.add(amount);
+//                System.out.println("Current balance: " + balance);
+            } else {
+                System.out.println("Please enter a positive amount.");
+            }
+        } catch (NumberFormatException e) {
+            System.out.println("Invalid input. Please enter a valid amount.");
+        }
 
     }
 
     public void selectProduct() {
+        displayItems();
+        Scanner input = new Scanner(System.in);
+        System.out.print("Please input item code: ");
+        String userInputCode = input.nextLine();
+        if (inventory.containsKey(userInputCode)) {
+            if (inventory.get(userInputCode).getQuantity() > 0) {
+                if (balance.compareTo(inventory.get(userInputCode).getPrice()) >= 0) {
+                    // Subtracts price from balance
+                    balance = balance.subtract(inventory.get(userInputCode).getPrice());
+                    // Decrements quantity by 1
+                    inventory.get(userInputCode).decrementQuantity();
+                    // Need to make sound effect based on item type
+                    switch (inventory.get(userInputCode).getType()) {
+                        case "Chip":
+                            System.out.println("Crunch Crunch, It's Yummy!");
+                            break;
+                        case "Candy":
+                            System.out.println("Munch Munch, Mmm Mmm Good!");
+                            break;
+                        case "Drink":
+                            System.out.println("Glug Glug, Chug Chug!");
+                            break;
+                        case "Gum":
+                            System.out.println("Chew Chew, Pop!");
+                            break;
+                    }
+                } else {
+                    System.out.println("Insufficient balance.");
+                }
+            } else {
+                System.out.println("Item is sold out.");
+            }
+        } else {
+            System.out.println("Invalid Input.");
+        }
 
     }
 
     public void finishTransaction() {
+        BigDecimal dollars = balance.setScale(0, RoundingMode.DOWN);  // Whole dollars
+        BigDecimal cents = balance.remainder(BigDecimal.ONE).multiply(new BigDecimal("100")).setScale(0, RoundingMode.DOWN);  // Cents as whole number
 
+        BigDecimal quarters = cents.divide(new BigDecimal("25"), 0, RoundingMode.DOWN);  // Quarters
+        cents = cents.subtract(quarters.multiply(new BigDecimal("25")));  // Remaining cents
+
+        BigDecimal dimes = cents.divide(new BigDecimal("10"), 0, RoundingMode.DOWN);  // Dimes
+        cents = cents.subtract(dimes.multiply(new BigDecimal("10")));  // Remaining cents
+
+        BigDecimal nickels = cents.divide(new BigDecimal("5"), 0, RoundingMode.DOWN);  // Nickels
+        cents = cents.subtract(nickels.multiply(new BigDecimal("5")));  // Remaining cents
+
+        BigDecimal pennies = cents;  // Pennies
+
+        System.out.println("_____Change_____");
+        System.out.println("Dollars: " + dollars);
+        System.out.println("Quarters: " + quarters);
+        System.out.println("Dimes: " + dimes);
+        System.out.println("Nickels: " + nickels);
+        System.out.println("Pennies: " + pennies);
+        balance = BigDecimal.ZERO;  // Reset balance
     }
+
 
     public void generateSalesReport() {
 
     }
+
+
+
+
+
 }
+
+
+
