@@ -1,10 +1,11 @@
 package com.techelevator;
 
+import com.techelevator.items.*;
+
 import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.sql.SQLOutput;
 import java.util.Map;
 import java.util.Scanner;
 import java.util.TreeMap;
@@ -38,7 +39,24 @@ public class VendingMachine {
                     String name = parts[1];
                     BigDecimal price = new BigDecimal(parts[2]);
                     String type = parts[3];
-                    inventory.put(slotId, new VendingItem(name, price, type));
+                    switch (type) {
+                        case "Chip":
+                            inventory.put(slotId, new Chip(name, price, type));
+                            break;
+                        case "Candy":
+                            inventory.put(slotId, new Candy(name, price, type));
+                            break;
+                        case "Drink":
+                            inventory.put(slotId, new Drink(name, price, type));
+                            break;
+                        case "Gum":
+                            inventory.put(slotId, new Gum(name, price, type));
+                            break;
+                        default:
+                            // Handle unknown type
+                            System.out.println("Unknown type: " + type);
+                            break;
+                    }
                 }
             }
         } catch (IOException e) {
@@ -47,11 +65,12 @@ public class VendingMachine {
     }
 
     public void displayItems() {
+        System.out.println(String.format("%-8s  %-20s  %-7s  %-6s  %s", "SlotID", "Name", "Price", "Type", "Quantity"));
         for (Map.Entry<String, VendingItem> entry : inventory.entrySet()) {
             String slotId = entry.getKey();
             VendingItem item = entry.getValue();
             String status = item.getQuantity() > 0 ? String.valueOf(item.getQuantity()) : "SOLD OUT";
-            String productItems = String.format("%s  %-20s  %4.2f  %-8s  %s", slotId,  item.getName(),  item.getPrice(),  item.getType(), status);
+            String productItems = String.format("%-8s  %-20s  $%-6.2f  %-7s  %s", slotId,  item.getName(),  item.getPrice(),  item.getType(), status);
             System.out.println(productItems);
         }
     }
@@ -87,20 +106,7 @@ public class VendingMachine {
                     // Decrements quantity by 1
                     inventory.get(userInputCode).decrementQuantity();
                     // Need to make sound effect based on item type
-                    switch (inventory.get(userInputCode).getType()) {
-                        case "Chip":
-                            System.out.println("Crunch Crunch, It's Yummy!");
-                            break;
-                        case "Candy":
-                            System.out.println("Munch Munch, Mmm Mmm Good!");
-                            break;
-                        case "Drink":
-                            System.out.println("Glug Glug, Chug Chug!");
-                            break;
-                        case "Gum":
-                            System.out.println("Chew Chew, Pop!");
-                            break;
-                    }
+                    inventory.get(userInputCode).dispense();
                 } else {
                     System.out.println("Insufficient balance.");
                 }

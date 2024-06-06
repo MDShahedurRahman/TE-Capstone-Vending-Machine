@@ -1,8 +1,8 @@
-package com.techelevator;
+package com.techelevator.items;
 
 import java.math.BigDecimal;
 
-public class VendingItem {
+public abstract class VendingItem implements Vendable{
     private String name;
     private BigDecimal price;
     private String type;
@@ -12,7 +12,10 @@ public class VendingItem {
         this.name = name;
         this.price = price;
         this.type = type;
-        this.quantity = 5;
+    }
+
+    public void setQuantity(int quantity) {
+        this.quantity = quantity;
     }
 
     public String getName() {
@@ -31,9 +34,5 @@ public class VendingItem {
         return type;
     }
 
-    public void decrementQuantity() {
-        if (quantity > 0) {
-            quantity--;
-        }
-    }
+    public abstract void decrementQuantity();
 }
