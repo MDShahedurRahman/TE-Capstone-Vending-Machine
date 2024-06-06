@@ -33,7 +33,7 @@ public class VendingMenu {
 				choice = options[selectedOption - 1];
 			}
 		} catch (NumberFormatException e) {
-			// eat the exception, an error message will be displayed below since choice will be null
+			out.println("\n*** Invalid selection. Please try again. ***");
 		}
 		if (choice == null) {
 			out.println(System.lineSeparator() + "*** " + userInput + " is not a valid option ***" + System.lineSeparator());
@@ -48,6 +48,11 @@ public class VendingMenu {
 			out.println(optionNum + ") " + options[i]);
 		}
 		out.print(System.lineSeparator() + "Please choose an option >>> ");
+		out.flush();
+	}
+
+	public void displayMessage(String message) {
+		out.println(message);
 		out.flush();
 	}
 }

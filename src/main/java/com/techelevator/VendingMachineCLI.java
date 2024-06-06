@@ -19,9 +19,11 @@ public class VendingMachineCLI {
 	private static final String[] PURCHASE_MENU_OPTIONS = { PURCHASE_MENU_OPTION_FEED_MONEY, PURCHASE_MENU_OPTION_SELECT_PRODUCT, PURCHASE_MENU_OPTION_FINISH_TRANSACTION};
 
 	private VendingMenu menu;
+	private VendingMachine vendingMachine;
 
-	public VendingMachineCLI(VendingMenu menu) {
+	public VendingMachineCLI(VendingMenu menu, VendingMachine vendingMachine) {
 		this.menu = menu;
+		this.vendingMachine = vendingMachine;
 	}
 
 	public void run() {
@@ -29,18 +31,49 @@ public class VendingMachineCLI {
 		while (running) {
 			String choice = (String) menu.getChoiceFromOptions(MAIN_MENU_OPTIONS);
 
-			// A switch statement could also be used here.  Your choice.
-			if (choice.equals(MAIN_MENU_OPTION_DISPLAY_ITEMS)) {
-				// display vending machine items
-			} else if (choice.equals(MAIN_MENU_OPTION_PURCHASE)) {
-				// do purchase
+			switch (choice) {
+				case MAIN_MENU_OPTION_DISPLAY_ITEMS:
+					vendingMachine.displayItems();
+					break;
+				case MAIN_MENU_OPTION_PURCHASE:
+					purchaseMenu();
+					break;
+				case MAIN_MENU_OPTION_EXIT:
+					running = false;
+					break;
+				case MAIN_MENU_SECRET_OPTION:
+					vendingMachine.generateSalesReport();
+					break;
+			}
+		}
+	}
+
+	private void purchaseMenu() {
+		boolean purchasing = true;
+		while (purchasing) {
+			menu.displayMessage("Current Money Provided: $" + vendingMachine.getBalance());
+			String choice = (String) menu.getChoiceFromOptions(PURCHASE_MENU_OPTIONS);
+
+			switch (choice) {
+				case PURCHASE_MENU_OPTION_FEED_MONEY:
+					vendingMachine.feedMoney();
+					break;
+				case PURCHASE_MENU_OPTION_SELECT_PRODUCT:
+					vendingMachine.selectProduct();
+					break;
+				case PURCHASE_MENU_OPTION_FINISH_TRANSACTION:
+					vendingMachine.finishTransaction();
+					purchasing = false;
+					break;
 			}
 		}
 	}
 
 	public static void main(String[] args) {
 		VendingMenu menu = new VendingMenu(System.in, System.out);
-		VendingMachineCLI cli = new VendingMachineCLI(menu);
+		VendingMachine vendingMachine = new VendingMachine();
+		vendingMachine.loadInventory("vendingmachine.csv");
+		VendingMachineCLI cli = new VendingMachineCLI(menu, vendingMachine);
 		cli.run();
 	}
 }
