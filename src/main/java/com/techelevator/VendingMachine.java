@@ -3,9 +3,13 @@ package com.techelevator;
 import com.techelevator.items.*;
 
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Map;
 import java.util.Scanner;
 import java.util.TreeMap;
@@ -13,6 +17,7 @@ import java.util.TreeMap;
 public class VendingMachine {
     private Map<String, VendingItem> inventory;
     private BigDecimal balance;
+    private final String LOG_FILE_PATH = "Log.txt";
 
     public Map<String, VendingItem> getInventory() {
         return inventory;
@@ -21,8 +26,6 @@ public class VendingMachine {
     public BigDecimal getBalance() {
         return balance;
     }
-
-    private static final String LOG_FILE_PATH = "Log.txt";
 
     public VendingMachine() {
         this.inventory = new TreeMap<>();
@@ -84,6 +87,12 @@ public class VendingMachine {
                 // Adds user input to balance
                 balance = balance.add(amount);
 //                System.out.println("Current balance: " + balance);
+                //Logging
+                try (PrintWriter logWriter = new PrintWriter(new FileWriter(LOG_FILE_PATH, true))) {
+                    logWriter.println(getLogTimestamp() + " FEED MONEY: $" + amount + " $" + balance);
+                } catch (IOException e) {
+                    System.out.println("Error writing to log file: " + e.getMessage());
+                }
             } else {
                 System.out.println("Please enter a positive amount.");
             }
@@ -99,14 +108,22 @@ public class VendingMachine {
         System.out.print("Please input item code: ");
         String userInputCode = input.nextLine();
         if (inventory.containsKey(userInputCode)) {
-            if (inventory.get(userInputCode).getQuantity() > 0) {
-                if (balance.compareTo(inventory.get(userInputCode).getPrice()) >= 0) {
+            VendingItem item = inventory.get(userInputCode);
+            if (item.getQuantity() > 0) {
+                if (balance.compareTo(item.getPrice()) >= 0) {
                     // Subtracts price from balance
-                    balance = balance.subtract(inventory.get(userInputCode).getPrice());
+                    balance = balance.subtract(item.getPrice());
                     // Decrements quantity by 1
-                    inventory.get(userInputCode).decrementQuantity();
+                    item.decrementQuantity();
                     // Need to make sound effect based on item type
-                    inventory.get(userInputCode).dispense();
+                    item.dispense();
+                    //Logging
+                    try (PrintWriter logWriter = new PrintWriter(new FileWriter(LOG_FILE_PATH, true))) {
+                        logWriter.println(getLogTimestamp() + " " + item.getName() + " " + userInputCode + " $" + item.getPrice() + " $" + balance);
+                    } catch (IOException e) {
+                        System.out.println("Error writing to log file: " + e.getMessage());
+                    }
+
                 } else {
                     System.out.println("Insufficient balance.");
                 }
@@ -140,18 +157,26 @@ public class VendingMachine {
         System.out.println("Dimes: " + dimes);
         System.out.println("Nickels: " + nickels);
         System.out.println("Pennies: " + pennies);
+
+        //Logging
+        try (PrintWriter logWriter = new PrintWriter(new FileWriter(LOG_FILE_PATH, true))) {
+            logWriter.println(getLogTimestamp() + " GIVE CHANGE: $" + balance + " $0.00");
+        } catch (IOException e) {
+            System.out.println("Error writing to log file: " + e.getMessage());
+        }
+
         balance = BigDecimal.ZERO;  // Reset balance
+    }
+
+    private String getLogTimestamp() {
+        SimpleDateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy hh:mm:ss a");
+        return dateFormat.format(new Date());
     }
 
 
     public void generateSalesReport() {
 
     }
-
-
-
-
-
 }
 
 
