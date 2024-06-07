@@ -18,6 +18,10 @@ public class VendingMachine {
     private Map<String, VendingItem> inventory;
     private BigDecimal balance;
     private final String LOG_FILE_PATH = "Log.txt";
+    private Logger logger;
+    // Creating a variable to hold the total amount of money spent
+    private BigDecimal totalSales;
+
 
     public Map<String, VendingItem> getInventory() {
         return inventory;
@@ -30,6 +34,8 @@ public class VendingMachine {
     public VendingMachine() {
         this.inventory = new TreeMap<>();
         this.balance = BigDecimal.ZERO;
+        this.logger = new Logger("Log.txt");
+        this.totalSales = BigDecimal.ZERO;
     }
 
     public void loadInventory(String filename) {
@@ -88,11 +94,7 @@ public class VendingMachine {
                 balance = balance.add(amount);
 //                System.out.println("Current balance: " + balance);
                 //Logging
-                try (PrintWriter logWriter = new PrintWriter(new FileWriter(LOG_FILE_PATH, true))) {
-                    logWriter.println(getLogTimestamp() + " FEED MONEY: $" + amount + " $" + balance);
-                } catch (IOException e) {
-                    System.out.println("Error writing to log file: " + e.getMessage());
-                }
+                logger.log("FEED MONEY: $" + amount + " $" + balance);
             } else {
                 System.out.println("Please enter a positive amount.");
             }
@@ -117,12 +119,9 @@ public class VendingMachine {
                     item.decrementQuantity();
                     // Need to make sound effect based on item type
                     item.dispense();
-                    //Logging
-                    try (PrintWriter logWriter = new PrintWriter(new FileWriter(LOG_FILE_PATH, true))) {
-                        logWriter.println(getLogTimestamp() + " " + item.getName() + " " + userInputCode + " $" + item.getPrice() + " $" + balance);
-                    } catch (IOException e) {
-                        System.out.println("Error writing to log file: " + e.getMessage());
-                    }
+                    //Logging and updating Total Sales
+                    totalSales = totalSales.add(item.getPrice());
+                    logger.log(item.getName() + " " + userInputCode + " $" + item.getPrice() + " $" + balance);
 
                 } else {
                     System.out.println("Insufficient balance.");
@@ -159,11 +158,7 @@ public class VendingMachine {
         System.out.println("Pennies: " + pennies);
 
         //Logging
-        try (PrintWriter logWriter = new PrintWriter(new FileWriter(LOG_FILE_PATH, true))) {
-            logWriter.println(getLogTimestamp() + " GIVE CHANGE: $" + balance + " $0.00");
-        } catch (IOException e) {
-            System.out.println("Error writing to log file: " + e.getMessage());
-        }
+        logger.log("GIVE CHANGE: $" + balance + " $0.00");
 
         balance = BigDecimal.ZERO;  // Reset balance
     }
@@ -175,7 +170,7 @@ public class VendingMachine {
 
 
     public void generateSalesReport() {
-
+        logger.generateSalesReport(inventory, totalSales);
     }
 }
 
