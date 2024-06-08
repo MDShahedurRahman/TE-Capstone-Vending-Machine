@@ -35,7 +35,7 @@ public class VendingMenu {
 		} catch (NumberFormatException e) {
 			out.println("\n*** Invalid selection. Please try again. ***");
 		}
-		if (choice == null || !choice.toString().startsWith("*")) {
+		if (choice == null) {
 			out.println(System.lineSeparator() + "*** " + userInput + " is not a valid option ***" + System.lineSeparator());
 		}
 		return choice;
