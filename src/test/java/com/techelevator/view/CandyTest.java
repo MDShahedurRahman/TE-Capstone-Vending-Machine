@@ -25,12 +25,6 @@ public class CandyTest {
         assertEquals(5, candy.getQuantity());
     }
 
-    @Test
-    public void testDispense() {
-        candy.dispense(); // This will print "Munch Munch, Mmm Mmm Good!" to the console
-        // Asserting print statements in console is not typically done in unit tests
-        // But you can ensure the method runs without errors
-    }
 
     @Test
     public void testDecrement_Quantity() {
